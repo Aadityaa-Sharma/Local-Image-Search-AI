@@ -39,13 +39,13 @@ Search images using **natural language** powered by **Hybrid AI** — combining 
 ---
 ## 📸 Screenshots
 Homepage
-![](data/homepage.png)
+![](demo_images/homepage.png)
 
 Search Results
-![](data/search_results.png)
+![](demo_images/search_results.png)
 
 Server Snippet
-![](data/liveserver.png)
+![](demo_images/liveserver.png)
 
 
 ---
