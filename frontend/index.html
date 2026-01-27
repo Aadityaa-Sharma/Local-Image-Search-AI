@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Image Search</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0a0a0a;
+            --white: #fafafa;
+            --gray-50: #f5f5f5;
+            --gray-100: #e5e5e5;
+            --gray-200: #d4d4d4;
+            --gray-300: #a3a3a3;
+            --gray-400: #737373;
+            --gray-500: #525252;
+            --success: #22c55e;
+            --error: #ef4444;
+            --radius: 20px;
+            --radius-sm: 12px;
+            --radius-xs: 8px;
+            --accent-1: #ff6b6b;
+            --accent-2: #4ecdc4;
+            --accent-3: #ffe66d;
+            --accent-4: #95e1d3;
+            --accent-5: #dda0dd;
+            --accent-6: #98d8c8;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--white);
+            color: var(--black);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 14px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--black);
+        }
+
+        .nav-btn {
+            background: var(--gray-50);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            color: var(--black) !important;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--black);
+            color: var(--white) !important;
+        }
+
+        /* HERO SECTION WITH AESTHETIC SHAPES */
+        .hero {
+            position: relative;
+            margin-bottom: 60px;
+            overflow: hidden;
+            min-height: 320px;
+            padding: 40px 0;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: visible;
+        }
+
+        /* Floating aesthetic shapes */
+        .shape {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* Large gradient blob - top right */
+        .shape-blob-1 {
+            width: 400px;
+            height: 400px;
+            right: -100px;
+            top: -150px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        /* Teal blob - bottom left */
+        .shape-blob-2 {
+            width: 300px;
+            height: 300px;
+            left: -50px;
+            bottom: -100px;
+            background: radial-gradient(circle, rgba(78, 205, 196, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        /* Yellow accent blob */
+        .shape-blob-3 {
+            width: 200px;
+            height: 200px;
+            right: 20%;
+            top: 60%;
+            background: radial-gradient(circle, rgba(255, 230, 109, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Floating circles */
+        .shape-circle {
+            border-radius: 50%;
+            border: 2px solid;
+            opacity: 0.3;
+        }
+
+        .shape-circle-1 {
+            width: 80px;
+            height: 80px;
+            right: 15%;
+            top: 20%;
+            border-color: var(--accent-1);
+            animation: spin-slow 20s linear infinite, float 5s ease-in-out infinite;
+        }
+
+        .shape-circle-2 {
+            width: 40px;
+            height: 40px;
+            right: 25%;
+            top: 50%;
+            border-color: var(--accent-2);
+            background: rgba(78, 205, 196, 0.1);
+            animation: float 7s ease-in-out infinite reverse;
+        }
+
+        .shape-circle-3 {
+            width: 60px;
+            height: 60px;
+            left: 10%;
+            top: 30%;
+            border-color: var(--accent-5);
+            animation: float 9s ease-in-out infinite;
+        }
+
+        .shape-circle-4 {
+            width: 25px;
+            height: 25px;
+            left: 30%;
+            bottom: 20%;
+            border-color: var(--accent-3);
+            background: rgba(255, 230, 109, 0.2);
+            animation: bounce 4s ease-in-out infinite;
+        }
+
+        /* Filled circles/dots */
+        .shape-dot {
+            border-radius: 50%;
+        }
+
+        .shape-dot-1 {
+            width: 12px;
+            height: 12px;
+            right: 30%;
+            top: 25%;
+            background: var(--accent-1);
+            opacity: 0.4;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .shape-dot-2 {
+            width: 8px;
+            height: 8px;
+            right: 40%;
+            top: 60%;
+            background: var(--accent-2);
+            opacity: 0.5;
+            animation: pulse 4s ease-in-out infinite 0.5s;
+        }
+
+        .shape-dot-3 {
+            width: 16px;
+            height: 16px;
+            left: 25%;
+            top: 15%;
+            background: var(--accent-4);
+            opacity: 0.3;
+            animation: pulse 5s ease-in-out infinite 1s;
+        }
+
+        .shape-dot-4 {
+            width: 6px;
+            height: 6px;
+            left: 45%;
+            bottom: 30%;
+            background: var(--accent-5);
+            opacity: 0.5;
+            animation: pulse 3.5s ease-in-out infinite;
+        }
+
+        .shape-dot-5 {
+            width: 10px;
+            height: 10px;
+            right: 10%;
+            bottom: 40%;
+            background: var(--accent-3);
+            opacity: 0.4;
+            animation: pulse 4.5s ease-in-out infinite 0.3s;
+        }
+
+        /* Geometric lines */
+        .shape-line {
+            height: 2px;
+            opacity: 0.15;
+        }
+
+        .shape-line-1 {
+            width: 120px;
+            right: 5%;
+            top: 35%;
+            background: linear-gradient(90deg, transparent, var(--black), transparent);
+            transform: rotate(-15deg);
+        }
+
+        .shape-line-2 {
+            width: 80px;
+            right: 8%;
+            top: 42%;
+            background: linear-gradient(90deg, transparent, var(--accent-1), transparent);
+            transform: rotate(-15deg);
+        }
+
+        .shape-line-3 {
+            width: 60px;
+            left: 5%;
+            bottom: 35%;
+            background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+            transform: rotate(25deg);
+        }
+
+        /* Arches */
+        .shape-arch {
+            border: 2px solid;
+            border-bottom: none;
+            border-radius: 100px 100px 0 0;
+            opacity: 0.1;
+        }
+
+        .shape-arch-1 {
+            width: 100px;
+            height: 50px;
+            right: 20%;
+            bottom: 15%;
+            border-color: var(--black);
+            animation: float 7s ease-in-out infinite;
+        }
+
+        .shape-arch-2 {
+            width: 70px;
+            height: 35px;
+            right: 22%;
+            bottom: 15%;
+            border-color: var(--accent-1);
+            animation: float 7s ease-in-out infinite 0.2s;
+        }
+
+        .shape-arch-3 {
+            width: 140px;
+            height: 70px;
+            left: 15%;
+            top: 50%;
+            border-color: var(--accent-2);
+            opacity: 0.08;
+            animation: float 9s ease-in-out infinite reverse;
+        }
+
+        /* Cross/Plus shapes */
+        .shape-cross {
+            opacity: 0.2;
+        }
+
+        .shape-cross::before,
+        .shape-cross::after {
+            content: '';
+            position: absolute;
+            background: currentColor;
+        }
+
+        .shape-cross::before {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .shape-cross::after {
+            height: 2px;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .shape-cross-1 {
+            width: 20px;
+            height: 20px;
+            right: 35%;
+            top: 15%;
+            color: var(--accent-1);
+            animation: spin-slow 15s linear infinite;
+        }
+
+        .shape-cross-2 {
+            width: 15px;
+            height: 15px;
+            left: 40%;
+            top: 40%;
+            color: var(--accent-2);
+            animation: spin-slow 20s linear infinite reverse;
+        }
+
+        .shape-cross-3 {
+            width: 12px;
+            height: 12px;
+            right: 12%;
+            bottom: 25%;
+            color: var(--accent-5);
+            animation: spin-slow 18s linear infinite;
+        }
+
+        /* Squares/Diamonds */
+        .shape-square {
+            border: 2px solid;
+            opacity: 0.15;
+        }
+
+        .shape-square-1 {
+            width: 30px;
+            height: 30px;
+            left: 20%;
+            top: 60%;
+            border-color: var(--accent-3);
+            transform: rotate(45deg);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape-square-2 {
+            width: 20px;
+            height: 20px;
+            right: 45%;
+            top: 20%;
+            border-color: var(--accent-4);
+            transform: rotate(15deg);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        /* Wavy lines SVG */
+        .shape-wave {
+            opacity: 0.08;
+        }
+
+        /* Grid pattern */
+        .shape-grid {
+            width: 100px;
+            height: 100px;
+            right: 5%;
+            top: 60%;
+            opacity: 0.05;
+            background-image: 
+                linear-gradient(var(--black) 1px, transparent 1px),
+                linear-gradient(90deg, var(--black) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        .shape-grid-2 {
+            width: 80px;
+            height: 80px;
+            left: 2%;
+            top: 10%;
+            opacity: 0.04;
+            background-image: 
+                linear-gradient(var(--accent-2) 1px, transparent 1px),
+                linear-gradient(90deg, var(--accent-2) 1px, transparent 1px);
+            background-size: 15px 15px;
+            transform: rotate(15deg);
+        }
+
+        /* Semicircle */
+        .shape-semi {
+            border-radius: 0 0 100px 100px;
+            opacity: 0.1;
+        }
+
+        .shape-semi-1 {
+            width: 80px;
+            height: 40px;
+            left: 35%;
+            top: 5%;
+            background: var(--accent-1);
+            animation: float 7s ease-in-out infinite;
+        }
+
+        /* Ring */
+        .shape-ring {
+            border-radius: 50%;
+            border: 3px solid;
+        }
+
+        .shape-ring-1 {
+            width: 50px;
+            height: 50px;
+            right: 8%;
+            top: 70%;
+            border-color: var(--accent-4);
+            opacity: 0.2;
+            animation: spin-slow 25s linear infinite, float 8s ease-in-out infinite;
+        }
+
+        /* Concentric circles group */
+        .shape-concentric {
+            right: 5%;
+            top: 5%;
+        }
+
+        .shape-concentric .ring {
+            position: absolute;
+            border: 1.5px solid var(--black);
+            border-radius: 50%;
+            opacity: 0.08;
+        }
+
+        .shape-concentric .ring:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            top: 30px;
+            left: 30px;
+        }
+
+        .shape-concentric .ring:nth-child(2) {
+            width: 70px;
+            height: 70px;
+            top: 15px;
+            left: 15px;
+        }
+
+        .shape-concentric .ring:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            top: 0;
+            left: 0;
+        }
+
+        /* Zigzag line */
+        .shape-zigzag {
+            width: 100px;
+            height: 30px;
+            left: 50%;
+            bottom: 10%;
+            opacity: 0.1;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-10px) translateX(5px);
+            }
+            50% {
+                transform: translateY(-5px) translateX(-5px);
+            }
+            75% {
+                transform: translateY(-15px) translateX(3px);
+            }
+        }
+
+        @keyframes spin-slow {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.4;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hero h1,
+        .hero p {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.035em;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span {
+            display: block;
+            color: var(--gray-300);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .hero-sub {
+            font-size: 1rem;
+            color: var(--gray-400);
+            max-width: 400px;
+            letter-spacing: 0.01em;
+        }
+
+        .search-section {
+            margin-bottom: 0px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 20px 28px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 100px;
+            background: var(--white);
+            color: var(--black);
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--gray-300);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--black);
+        }
+
+        .btn {
+            padding: 20px 36px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--gray-500);
+            transform: translateY(-2px);
+        }
+
+        .filters-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+
+        .filters-toggle:hover {
+            color: var(--black);
+        }
+
+        .filters {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            padding: 24px;
+            background: var(--gray-50);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .filters.active {
+            display: grid;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+        }
+
+        .filter-input {
+            padding: 12px 16px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xs);
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--black);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 40px;
+            padding: 20px 0;
+            margin-bottom: 40px;
+            border-top: 1px solid var(--gray-100);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .result-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--gray-100);
+        }
+
+        .result-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        }
+
+        .result-card:hover .result-image {
+            transform: scale(1.05);
+        }
+
+        .result-image-wrapper {
+            overflow: hidden;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .result-image {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            background: var(--gray-50);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .result-content {
+            padding: 20px;
+        }
+
+        .result-caption {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .result-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .keyword {
+            background: var(--gray-50);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            letter-spacing: 0.02em;
+        }
+
+        .result-scores {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .score {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gray-300);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .score-value {
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--gray-100);
+            border-top-color: var(--black);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            opacity: 0.2;
+        }
+
+        .empty-state h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-100);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--gray-50);
+            border: none;
+            color: var(--black);
+            font-size: 1.2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--gray-100);
+            transform: rotate(90deg);
+        }
+
+        .modal-image {
+            width: 100%;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+        }
+
+        .stats-grid-modal {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-card {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: var(--radius-sm);
+        }
+
+        .readme-content h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            padding-bottom: 8px;
+        }
+
+        .readme-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .readme-content p {
+            color: var(--gray-500);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .readme-content ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+            color: var(--gray-500);
+        }
+
+        .readme-content li {
+            margin-bottom: 8px;
+        }
+
+        .readme-content code {
+            background: var(--gray-100);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: var(--black);
+        }
+
+        .readme-content pre {
+            background: var(--black);
+            color: var(--gray-200);
+            padding: 20px;
+            border-radius: var(--radius-xs);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .readme-content pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-ok {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .status-err {
+            background-color: var(--error);
+            box-shadow: 0 0 10px var(--error);
+        }
+
+        .upload-section {
+            margin-top: 24px;
+            padding: 60px 40px;
+            border: 2px dashed var(--gray-200);
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: var(--black);
+            background: var(--gray-50);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--black);
+            color: var(--white);
+            padding: 16px 32px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 48px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 24px;
+            }
+
+            .stats-grid-modal {
+                grid-template-columns: 1fr;
+            }
+
+            /* Hide some shapes on mobile */
+            .shape-blob-1,
+            .shape-blob-3,
+            .shape-grid,
+            .shape-concentric {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Image Search AI</div>
+            <nav class="nav-links">
+                <a href="#" class="nav-btn" onclick="triggerBuild(); return false;">⚡ Build Index</a>
+                <a href="#" onclick="showUpload(); return false;">Upload</a>
+                <a href="#" onclick="showStats(); return false;">Stats</a>
+                <a href="#" onclick="checkHealth(); return false;">Health</a>
+                <a href="#" onclick="showAbout(); return false;">About</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <!-- AESTHETIC GEOMETRIC BACKGROUND SHAPES -->
+            <div class="hero-bg">
+                <!-- Gradient blobs -->
+                <div class="shape shape-blob-1"></div>
+                <div class="shape shape-blob-2"></div>
+                <div class="shape shape-blob-3"></div>
+
+                <!-- Circles with borders -->
+                <div class="shape shape-circle shape-circle-1"></div>
+                <div class="shape shape-circle shape-circle-2"></div>
+                <div class="shape shape-circle shape-circle-3"></div>
+                <div class="shape shape-circle shape-circle-4"></div>
+
+                <!-- Dots -->
+                <div class="shape shape-dot shape-dot-1"></div>
+                <div class="shape shape-dot shape-dot-2"></div>
+                <div class="shape shape-dot shape-dot-3"></div>
+                <div class="shape shape-dot shape-dot-4"></div>
+                <div class="shape shape-dot shape-dot-5"></div>
+
+                <!-- Lines -->
+                <div class="shape shape-line shape-line-1"></div>
+                <div class="shape shape-line shape-line-2"></div>
+                <div class="shape shape-line shape-line-3"></div>
+
+                <!-- Arches -->
+                <div class="shape shape-arch shape-arch-1"></div>
+                <div class="shape shape-arch shape-arch-2"></div>
+                <div class="shape shape-arch shape-arch-3"></div>
+
+                <!-- Crosses -->
+                <div class="shape shape-cross shape-cross-1"></div>
+                <div class="shape shape-cross shape-cross-2"></div>
+                <div class="shape shape-cross shape-cross-3"></div>
+
+                <!-- Squares -->
+                <div class="shape shape-square shape-square-1"></div>
+                <div class="shape shape-square shape-square-2"></div>
+
+                <!-- Grid patterns -->
+                <div class="shape shape-grid"></div>
+                <div class="shape shape-grid-2"></div>
+
+                <!-- Semicircle -->
+                <div class="shape shape-semi shape-semi-1"></div>
+
+                <!-- Ring -->
+                <div class="shape shape-ring shape-ring-1"></div>
+
+                <!-- Concentric circles -->
+                <div class="shape shape-concentric">
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                </div>
+
+                <!-- SVG Wavy line -->
+                <svg class="shape shape-wave" style="position: absolute; left: 60%; top: 75%; width: 150px; height: 40px;" viewBox="0 0 150 40">
+                    <path d="M0 20 Q25 5 50 20 T100 20 T150 20" stroke="#4ecdc4" stroke-width="2" fill="none" opacity="0.2"/>
+                </svg>
+
+                <!-- SVG Zigzag -->
+                <svg class="shape shape-zigzag" viewBox="0 0 100 30">
+                    <polyline points="0,15 15,5 30,25 45,5 60,25 75,5 90,25 100,15" stroke="#ff6b6b" stroke-width="2" fill="none" opacity="0.15"/>
+                </svg>
+
+                <!-- SVG Spiral -->
+                <svg class="shape" style="position: absolute; right: 2%; top: 40%; width: 60px; height: 60px; opacity: 0.1;" viewBox="0 0 60 60">
+                    <path d="M30 30 m0 -5 a5 5 0 1 1 0 10 a10 10 0 1 0 0 -20 a15 15 0 1 1 0 30 a20 20 0 1 0 0 -40" stroke="#000" stroke-width="1.5" fill="none"/>
+                </svg>
+
+                <!-- Additional decorative SVG elements -->
+                <svg class="shape" style="position: absolute; left: 8%; top: 70%; width: 50px; height: 50px; opacity: 0.08;" viewBox="0 0 50 50">
+                    <polygon points="25,5 45,45 5,45" stroke="#ffe66d" stroke-width="2" fill="none"/>
+                </svg>
+
+                <svg class="shape" style="position: absolute; right: 50%; top: 5%; width: 40px; height: 40px; opacity: 0.1;" viewBox="0 0 40 40">
+                    <rect x="5" y="5" width="30" height="30" rx="5" stroke="#95e1d3" stroke-width="2" fill="none" transform="rotate(15 20 20)"/>
+                </svg>
+            </div>
+
+            <h1>
+                Semantic
+                <span>Image Search</span>
+            </h1>
+            <p class="hero-sub">
+                Discover images through natural language. Powered by BLIP + CLIP neural networks.
+            </p>
+        </section>
+
+
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input"
+                    placeholder="Describe what you're looking for..." autofocus>
+                <button class="btn btn-primary" onclick="performSearch()">Search</button>
+            </div>
+
+            <div class="filters-toggle" onclick="toggleFilters()">
+                <span>⚙</span> Advanced options
+            </div>
+
+            <div id="filtersPanel" class="filters">
+                <div class="filter-group">
+                    <label>Results</label>
+                    <input type="number" id="topK" class="filter-input" value="12" min="1" max="50">
+                </div>
+                <div class="filter-group">
+                    <label>Min Score</label>
+                    <input type="number" id="minScore" class="filter-input" value="0" min="0" max="1" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label>CLIP Weight</label>
+                    <input type="number" id="clipWeight" class="filter-input" value="0.8" min="0" max="1" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label>Keyword Weight</label>
+                    <input type="number" id="keywordWeight" class="filter-input" value="0.2" min="0" max="1" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <div id="statsBar" class="stats-bar" style="display: none;">
+            <div class="stat">
+                <span class="stat-label">Query</span>
+                <span class="stat-value" id="queryText">—</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Results</span>
+                <span class="stat-value" id="resultCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Time</span>
+                <span class="stat-value" id="searchTime">0s</span>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Searching images...</p>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <div class="empty-state-icon">◎</div>
+            <h2>Start exploring</h2>
+            <p>Enter a natural language query to find images</p>
+        </div>
+
+        <div id="resultsGrid" class="results-grid"></div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('modal')">×</button>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <h3 id="modalCaption"></h3>
+            <div id="modalKeywords" class="result-keywords"></div>
+            <div id="modalScores" class="result-scores"></div>
+            <div id="modalMetadata"
+                style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--gray-100); font-size: 0.85rem; color: var(--gray-500);">
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('uploadModal')">×</button>
+            <h3 style="margin-bottom: 8px;">Upload Images</h3>
+            <p style="color: var(--gray-400); font-size: 0.9rem; margin-bottom: 24px;">Add new images to the search
+                index</p>
+            <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">↑</div>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p style="margin-top: 8px; font-size: 0.75rem;">JPG, PNG, WEBP, GIF</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" multiple onchange="uploadImage()">
+        </div>
+    </div>
+
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('statsModal')">×</button>
+            <h3 style="margin-bottom: 24px;">Dataset Statistics</h3>
+            <div id="statsContent" class="stats-grid-modal">
+            </div>
+        </div>
+    </div>
+
+    <div id="healthModal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <button class="modal-close" onclick="closeModal('healthModal')">×</button>
+            <h3 style="margin-bottom: 24px;">System Health</h3>
+            <div id="healthStatusIcon" style="font-size: 3rem; margin-bottom: 16px;"></div>
+            <h2 id="healthStatusText" style="margin-bottom: 8px;">Checking...</h2>
+            <p id="healthStatusDetail" style="color: var(--gray-400); margin-bottom: 20px;"></p>
+            <div style="background: var(--gray-50); padding: 12px; border-radius: var(--radius-xs); text-align: left;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.8rem; color: var(--gray-400);">LATENCY</span>
+                    <span id="healthLatency" style="font-family: monospace;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.8rem; color: var(--gray-400);">STATUS</span>
+                    <span id="healthCode" style="font-family: monospace;">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
+            <div class="readme-content">
+                <h3>Image Search AI</h3>
+                <p>A minimalist, high-performance semantic search engine using hybrid AI models (BLIP + CLIP) to
+                    understand and retrieve images based on natural language queries.</p>
+
+                <h3>Features</h3>
+                <ul>
+                    <li><strong>Hybrid Search:</strong> Combines visual embeddings (CLIP) with generated captions
+                        (BLIP).</li>
+                    <li><strong>Smart Keyword Cleaning:</strong> Automated noise reduction for better indexing.</li>
+                    <li><strong>Minimalist UI:</strong> Clean interface focused on content.</li>
+                </ul>
+
+                <h3>Tech Stack</h3>
+                <p>Built with efficiency in mind, using a lightweight stack:</p>
+                <ul>
+                    <li><strong>Backend:</strong> Python, FastAPI, PyTorch</li>
+                    <li><strong>AI Models:</strong> OpenAI CLIP, Salesforce BLIP</li>
+                    <li><strong>Frontend:</strong> Vanilla HTML/JS, CSS Variables</li>
+                </ul>
+
+                <p style="font-size: 0.8rem; margin-top: 40px; color: var(--gray-300);">
+                    Version 1.0.0 • Local Deployment
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // --- CORE FUNCTIONS ---
+        let currentResults = [];
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        function toggleFilters() {
+            document.getElementById('filtersPanel').classList.toggle('active');
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showToast('Please enter a search query');
+                return;
+            }
+
+            // UI Reset
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsGrid').style.display = 'none';
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('statsBar').style.display = 'none';
+
+            try {
+                // Get filter values
+                const topK = document.getElementById('topK').value;
+                const minScore = document.getElementById('minScore').value;
+                const clipWeight = document.getElementById('clipWeight').value;
+                const kwWeight = document.getElementById('keywordWeight').value;
+
+                const params = new URLSearchParams({
+                    query: query,
+                    top_k: topK,
+                    min_score: minScore,
+                    clip_weight: clipWeight,
+                    keyword_weight: kwWeight
+                });
+
+                const response = await fetch(`/api/search?${params}`);
+                if (!response.ok) throw new Error('Search failed');
+
+                const data = await response.json();
+                currentResults = data.results;
+                displayResults(data);
+            } catch (error) {
+                console.error('Search error:', error);
+                showToast('Search failed. Please try again.');
+                document.getElementById('emptyState').style.display = 'block';
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '';
+
+            if (data.results.length === 0) {
+                document.getElementById('emptyState').innerHTML = `
+                    <div class="empty-state-icon">○</div>
+                    <h2>No results</h2>
+                    <p>Try a different query or adjust the filters</p>
+                `;
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('statsBar').style.display = 'flex';
+            document.getElementById('queryText').textContent = data.query;
+            document.getElementById('resultCount').textContent = data.total_results;
+            document.getElementById('searchTime').textContent = data.search_time.toFixed(2) + 's';
+
+            grid.style.display = 'grid';
+            data.results.forEach((result) => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.onclick = () => showDetail(result);
+
+                const keywords = result.keywords.slice(0, 4).map(k =>
+                    `<span class="keyword">${k}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="result-image-wrapper">
+                        <img 
+                            src="/api/image/${result.filename}?thumbnail=true" 
+                            alt="${result.caption}"
+                            class="result-image"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="result-content">
+                        <div class="result-caption">${result.caption}</div>
+                        <div class="result-keywords">${keywords}</div>
+                        <div class="result-scores">
+                            <div class="score">
+                                <span class="score-label">CLIP</span>
+                                <span class="score-value">${result.clip_score.toFixed(3)}</span>
+                            </div>
+                            <div class="score">
+                                <span class="score-label">Keywords</span>
+                                <span class="score-value">${result.keyword_score.toFixed(3)}</span>
+                            </div>
+                            <div class="score">
+                                <span class="score-label">Final</span>
+                                <span class="score-value">${result.final_score.toFixed(3)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- MODAL & UI HELPERS ---
+
+        function showDetail(result) {
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('modalImage').src = `/api/image/${result.filename}`;
+            document.getElementById('modalCaption').textContent = result.caption;
+
+            const keywordsHtml = result.keywords.map(k => `<span class="keyword">${k}</span>`).join('');
+            document.getElementById('modalKeywords').innerHTML = keywordsHtml;
+
+            document.getElementById('modalScores').innerHTML = `
+                <div class="score"><span class="score-label">CLIP Score</span><span class="score-value">${result.clip_score.toFixed(3)}</span></div>
+                <div class="score"><span class="score-label">Keyword Score</span><span class="score-value">${result.keyword_score.toFixed(3)}</span></div>
+                <div class="score"><span class="score-label">Final Score</span><span class="score-value">${result.final_score.toFixed(3)}</span></div>
+            `;
+
+            if (result.metadata) {
+                const meta = result.metadata;
+                document.getElementById('modalMetadata').innerHTML = `
+                    <p><strong>Dimensions:</strong> ${meta.width || 'N/A'} × ${meta.height || 'N/A'}</p>
+                    <p><strong>Size:</strong> ${formatBytes(meta.size_bytes || 0)}</p>
+                    <p><strong>Format:</strong> ${meta.format || 'N/A'}</p>
+                    <p><strong>Filename:</strong> ${result.filename}</p>
+                `;
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // --- NEW FEATURES ---
+
+        function showUpload() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function showAbout() {
+            document.getElementById('aboutModal').classList.add('active');
+        }
+
+        async function triggerBuild() {
+            if (!confirm("Start building index for new images? This runs in the background.")) return;
+
+            showToast("🚀 Build started in background...");
+            try {
+                const res = await fetch('/api/build', { method: 'POST' });
+                const data = await res.json();
+                console.log(data);
+                showToast("Build running. Check stats in a moment.");
+            } catch (e) {
+                console.error(e);
+                showToast("Failed to start build.");
+            }
+        }
+
+        async function showStats() {
+            document.getElementById('statsModal').classList.add('active');
+            const container = document.getElementById('statsContent');
+            container.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+
+                container.innerHTML = `
+                    <div class="stats-card">
+                        <span class="stat-label">Total Images</span>
+                        <div class="stat-value">${data.total_images}</div>
+                    </div>
+                    <div class="stats-card">
+                        <span class="stat-label">Total Keywords</span>
+                        <div class="stat-value">${data.total_keywords}</div>
+                    </div>
+                    <div class="stats-card">
+                        <span class="stat-label">Unique Keywords</span>
+                        <div class="stat-value">${data.unique_keywords}</div>
+                    </div>
+                    <div class="stats-card">
+                        <span class="stat-label">Device</span>
+                        <div class="stat-value" style="font-size: 0.9rem">${data.model_info.device}</div>
+                    </div>
+                    <div class="stats-card" style="grid-column: span 2;">
+                        <span class="stat-label">Models</span>
+                        <div style="font-size: 0.8rem; color: var(--gray-500); margin-top: 4px;">
+                            ${data.model_info.blip_model}<br>
+                            ${data.model_info.clip_model}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = '<p>Failed to load stats.</p>';
+            }
+        }
+
+        async function checkHealth() {
+            document.getElementById('healthModal').classList.add('active');
+            const icon = document.getElementById('healthStatusIcon');
+            const text = document.getElementById('healthStatusText');
+            const detail = document.getElementById('healthStatusDetail');
+
+            icon.innerHTML = '⚡';
+            text.innerText = 'Checking...';
+
+            const start = Date.now();
+            try {
+                const response = await fetch('/api/stats'); // Use stats as heartbeat
+                const latency = Date.now() - start;
+
+                if (response.ok) {
+                    icon.innerHTML = '🟢';
+                    text.innerText = 'System Online';
+                    detail.innerText = 'All services operational';
+                    document.getElementById('healthLatency').innerText = latency + 'ms';
+                    document.getElementById('healthCode').innerText = response.status + ' OK';
+                } else {
+                    throw new Error('Non-200 response');
+                }
+            } catch (e) {
+                icon.innerHTML = '🔴';
+                text.innerText = 'System Offline';
+                detail.innerText = 'Cannot reach API backend';
+                document.getElementById('healthLatency').innerText = 'TIMEOUT';
+                document.getElementById('healthCode').innerText = 'ERR';
+            }
+        }
+
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
+
+            if (files.length === 0) return;
+
+            showToast(`Uploading ${files.length} images...`);
+
+            const formData = new FormData();
+            // Append all selected files
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const data = await response.json();
+                showToast(`✓ ${data.count} images saved! Click 'Build Index' to process.`);
+                closeModal('uploadModal');
+                fileInput.value = '';
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('Upload failed');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        };
+    </script>
+</body>
+
+</html>
